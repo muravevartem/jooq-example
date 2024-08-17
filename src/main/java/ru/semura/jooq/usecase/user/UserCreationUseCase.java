@@ -3,6 +3,7 @@ package ru.semura.jooq.usecase.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.semura.jooq.api.user.error.UsernameIsNotUniqueException;
 import ru.semura.jooq.api.user.model.UserCreationRequest;
 import ru.semura.jooq.api.user.model.UserResponse;
 import ru.semura.jooq.common.UseCase;
@@ -22,7 +23,7 @@ public class UserCreationUseCase implements UseCase<UserCreationRequest, UserRes
     public UserResponse execute(UserCreationRequest request) {
         Username username = new Username(request.username());
         if (!userRepository.isUniqueUsername(username)) {
-            throw new IllegalArgumentException("Username is not unique");
+            throw new UsernameIsNotUniqueException();
         }
 
         Email email = new Email(request.email());

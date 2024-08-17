@@ -2,8 +2,12 @@ package ru.semura.jooq.api.user;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.semura.jooq.api.Error;
+import ru.semura.jooq.api.ApiError;
+import ru.semura.jooq.api.ApiErrorCode;
+import ru.semura.jooq.api.user.error.UsernameIsNotUniqueException;
 import ru.semura.jooq.api.user.model.UserCreationRequest;
 import ru.semura.jooq.api.user.model.UserResponse;
 import ru.semura.jooq.query.UserReadRepository;
@@ -23,13 +27,18 @@ public class UserController {
         return userReadRepository.findAll();
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public UserResponse createUser(@RequestBody @Valid UserCreationRequest request) {
         return userCreationUseCase.execute(request);
     }
 
     @ExceptionHandler
-    public Error<?> handle(IllegalArgumentException e) {
-        return Error.of("bad_request", e.getMessage());
+    public ResponseEntity<ApiError<Void>> handle(UsernameIsNotUniqueException e) {
+        return ApiError.of(UserApiCode.USERNAME_IS_NOT_UNIQUE);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ApiError<Void>> handle(IllegalArgumentException e) {
+        return ApiError.of(ApiErrorCode.valueOf(400));
     }
 }
